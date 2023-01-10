@@ -109,7 +109,7 @@ if ($editable) {
          LEFT JOIN {relationship_members} rm ON (rm.relationshipcohortid = rc.id AND rm.userid = cm.userid)
              WHERE rc.relationshipid = :relationshipid
                AND rc.uniformdistribution = 1
-               AND ISNULL(rm.userid)
+               AND COALESCE(rm.userid,1) = 1
           GROUP BY rc.id, rc.roleid";
     $rcs = $DB->get_records_sql($sql, array('relationshipid' => $relationshipid));
     if (!empty($rcs)) {
