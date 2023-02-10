@@ -56,7 +56,7 @@ foreach($csv_data as $row){
     continue;
   }
   // verifica o usuário esta no cohort
-  $sql = "SELECT * FROM mdl_relationship_cohorts rc JOIN mdl_cohort_members cm ON rc.cohortid = cm.cohortid WHERE rc.relationshipid = :relationshipid AND cm.userid = :userid";
+  $sql = "SELECT rc.id as id FROM mdl_relationship_cohorts rc JOIN mdl_cohort_members cm ON rc.cohortid = cm.cohortid WHERE rc.relationshipid = :relationshipid AND cm.userid = :userid";
 
   $result = $DB->get_record_sql($sql, ['relationshipid' => $relationshipid, 'userid' => $user_id]);
 
@@ -66,12 +66,14 @@ foreach($csv_data as $row){
   } else {
     //verifica se o aluno já está no grupo
     $sql = "SELECT * FROM mdl_relationship_members rm WHERE rm.relationshipgroupid = :relationshipgroupid AND rm.relationshipcohortid = :relationshipcohortid AND rm.userid = :userid";
-    $result = $DB->get_record_sql($sql, ['relationshipgroupid' => $group_id, 'relationshipcohortid' => $result->id, 'userid' => $user_id]);
-    if($result != FALSE){
+    $isInGroup = $DB->get_record_sql($sql, ['relationshipgroupid' => $group_id, 'relationshipcohortid' => $result->id, 'userid' => $user_id]);
+    if($isInGroup != FALSE){
       echo 'Aluno'.$row['username'].' já está no grupo';
       continue;
     } 
     $relationshipcohortid = $result->id;
+    //var_dump($result);
+    //exit();
     //insere o usuário no relationship_members
     $result = insertMember($group_id, $relationshipcohortid, $user_id);
     echo 'Aluno'.$row['username'].' inserido no grupo com id' .$result->id. '<br/>';
