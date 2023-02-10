@@ -9,7 +9,7 @@ $data = [];
 foreach($csv_data as $row){
   $data[] = array_map('trim', $row);
 }
-var_dump($data);
+//var_dump($data);
 $csv_data = $data;
 array_walk($csv_data , function(&$x) use ($csv_data) {
   $x = array_combine($csv_data[0], $x);
@@ -26,34 +26,33 @@ array_shift($csv_data);
 
 // Print Result Data
 echo 'relationship id is' .$relationshipid.'<pre/>';
-print_r($csv_data);
+//print_r($csv_data);
 //verificar se o grupo já foi inserido com o mesmo nome
 //verificar se aluno já foi inserido no grupo
 foreach($csv_data as $row){
   //se grupo não existir
   $sql = "SELECT * FROM mdl_relationship_groups rg WHERE rg.relationshipid = :relationshipid AND rg.name = :group_name";
   $group = $DB->get_record_sql($sql, ['relationshipid' => $relationshipid, 'group_name' => $row['grupo']]);
-  print_r($result);
+ // print_r($result);
   //Verifica grupo e cria um novo se necessário
   //$group_id = null;
-  echo 'resultado do grupo';
-  var_dump($group);
+  //var_dump($group);
   if($group == FALSE){
     $group = createGroup($relationshipid, $row['grupo']);
   }
   $group_id = $group->id;
-  echo 'gruyop id é';
-  var_dump($group_id);
+  echo 'group id é ';
+  //var_dump($group_id);
   //Verifica se aluno já está no grupo
   //pega o userid do aluno pelo username
   $sql = "SELECT * FROM mdl_user u WHERE u.username = :username";
   $result = $DB->get_record_sql($sql, ['username' => trim($row['username'])]);
   if($result != FALSE){
     $user_id = $result->id;
-    echo 'Aluno'.$row['username'].' encontrado com id' .$user_id. '<br/>';
+    echo 'Usuário '.$row['username'].' encontrado com id ' .$user_id. '<br/>';
   }
   else{
-    echo 'Aluno'.$row['username'].' não encontrado';
+    echo 'Usuário '.$row['username'].' não encontrado';
     continue;
   }
   // verifica o usuário esta no cohort
@@ -65,6 +64,13 @@ foreach($csv_data as $row){
     echo 'Aluno'.$row['username'].' não está no cohort';
     continue;
   } else {
+    //verifica se o aluno já está no grupo
+    $sql = "SELECT * FROM mdl_relationship_members rm WHERE rm.relationshipgroupid = :relationshipgroupid AND rm.relationshipcohortid = :relationshipcohortid AND rm.userid = :userid";
+    $result = $DB->get_record_sql($sql, ['relationshipgroupid' => $group_id, 'relationshipcohortid' => $result->id, 'userid' => $user_id]);
+    if($result != FALSE){
+      echo 'Aluno'.$row['username'].' já está no grupo';
+      continue;
+    } 
     $relationshipcohortid = $result->id;
     //insere o usuário no relationship_members
     $result = insertMember($group_id, $relationshipcohortid, $user_id);
