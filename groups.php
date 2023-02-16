@@ -136,6 +136,14 @@ if ($editable) {
     $addgroup = new single_button(new moodle_url('/local/relationship/edit_group.php', array('relationshipid' => $relationshipid)), get_string('addgroup', 'local_relationship'));
     $addgroups = new single_button(new moodle_url('/local/relationship/autogroup.php', array('relationshipid' => $relationshipid)), get_string('autogroup', 'local_relationship'));
     echo html_writer::tag('div', $OUTPUT->render($addgroup).$OUTPUT->render($addgroups), array('class' => 'buttons'));
+    ?>
+    <form action="upload.php" method="post" enctype="multipart/form-data">
+        <input type="file" name="csv" value="" />
+        <input type="hidden" name="relationshipid" value="<?=$relationshipid?>" />
+        
+        <input type="submit" name="submit" value="Save" /></form>
+
+    <?php
 } else if ($manager) {
     echo $OUTPUT->heading(get_string('noeditable', 'local_relationship'));
 }
